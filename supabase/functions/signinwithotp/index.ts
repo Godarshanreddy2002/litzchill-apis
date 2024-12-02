@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     }
 
     
-    return new Response(JSON.stringify({ message: "OTP sent successfully", data: data }), {
+    return new Response(JSON.stringify({ message: "OTP sent successfully given mobile number", data: data }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

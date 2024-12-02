@@ -19,13 +19,7 @@ export default async function verifyUser(email: string, password: string) {
     if (password==data.password) {
      if (error) {
         throw new Error('User not found in Supabase');
-      }
-
-      
-    
-    
-     
-    
+      }        
     } else {
       throw new Error("Incorrect password");
     }
