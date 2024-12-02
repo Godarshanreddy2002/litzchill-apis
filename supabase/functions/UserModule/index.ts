@@ -1,12 +1,9 @@
-import {createClient} from "npm:@supabase/supabase-js"
+
 import signInWithOtp from "../Handler/SendOtp.ts";
 import verifyOtp from "../Handler/VerifyOtp.ts";
 import updateUserProfile from "../Handler/ProfileUpdate.ts";
 
-const url='https://rpsfsggtydflqjkduzgt.supabase.co'
-const key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwc2ZzZ2d0eWRmbHFqa2R1emd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIxNzE2ODYsImV4cCI6MjA0Nzc0NzY4Nn0.wdRGjSJBef_UexqTmpok3-cRxHO6I86jbDMYmvbzZC0'
 
-const supabase=createClient(url,key);
 
 
 Deno.serve(async (req: Request) => {
