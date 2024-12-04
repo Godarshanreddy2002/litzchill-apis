@@ -1,8 +1,5 @@
-import {createClient} from "npm:@supabase/supabase-js"
-const url='https://rpsfsggtydflqjkduzgt.supabase.co'
-const key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwc2ZzZ2d0eWRmbHFqa2R1emd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIxNzE2ODYsImV4cCI6MjA0Nzc0NzY4Nn0.wdRGjSJBef_UexqTmpok3-cRxHO6I86jbDMYmvbzZC0'
-
-const supabase=createClient(url,key);
+import {supabase} from "../DbConfig/DbConn.ts";
+// import { UserProfile } from "../model/UserTable.ts";
 import { getAuthUser, getUser } from "../Repository/LoginVerifyRepo.ts";
 
 export default async function verifyOtp(req: Request) {
@@ -21,6 +18,7 @@ export default async function verifyOtp(req: Request) {
                 },
             );
         }
+        const user=await getUser(phoneNo);
 
         const { data, error } = await supabase.auth.verifyOtp({
             phone: phoneNo,
@@ -28,15 +26,25 @@ export default async function verifyOtp(req: Request) {
             type: "sms",
         });
 
+
         if (error) {
-            const user=await getUser(phoneNo);
-            const faildLogincount:number=user.failed_login_count;
-            if(user&&faildLogincount==3)
+            let lockoutTIME;
+            if(user)
             {
+                let faildLogincount:number=user.failed_login_count+1;
+                
+                if(faildLogincount>=3){
+                    lockoutTIME = new Date(new Date().getTime() + 60 * 60 * 1000).toISOString()
+                }
+                else if(!user.lockout_time&&user.lockout_time<new Date().toISOString())
+                {
+                    lockoutTIME=null;
+                    faildLogincount=0;
+                }
                 console.log("Trying to set lock out time")
                 const {data,error}=await supabase
                 .from('public.users')
-                .update({'lockout_time':new Date(new Date().getTime() + 60 * 60 * 1000).toISOString()})
+                .update({'lockout_time':lockoutTIME,'failed_login_count':faildLogincount})
                 .eq('mobile',phoneNo).single();
                 if(error)
                 {
@@ -46,38 +54,18 @@ export default async function verifyOtp(req: Request) {
                 {
                     console.log("lockout time set 1 hour successfully")
                 }
-
-            }
-            else if(user&&faildLogincount<3)            
-            {
-                console.log("trying to incrementing faild login count")
-                const {data,error}=await supabase
-                .from('public.users')
-                .update({'failed_login_count':faildLogincount+1})
-                .eq('mobile',phoneNo).single();
-
-                if(error)
-                {
-                    console.log("faild login count is not incremented")
-                }
-                else{
-                    console.log("Faild login count is incremented")
-                }
-            }
-            else
-            {
-                console.log("new user")
-            }
-            
+            }            
             return new Response(JSON.stringify({ error: error.message }), {
                 status: 400,
                 headers: { "Content-Type": "application/json" },
             });
         }
-
-        const id = data.user?.id;
+        else
+        {
+            const {user:verifiedUser,session:userSession} = data;
+            const id = verifiedUser?.id;
         if (id) {
-            console.log("Checking if user exists...");
+                console.log("Checking if user exists or not for creating new user...");
             const data = await getAuthUser(id);
 
             if (data) {
@@ -88,21 +76,21 @@ export default async function verifyOtp(req: Request) {
                 const { data: userData, error: userError } = await supabase
                     .from("users")
                     .insert({
-                        "auth_user_id": id,
+                            "user_id":id,                    
                         "mobile":phoneNo,
                         "account_verified": { email: false, phone: true },
-                        "lock_time":new Date().toISOString(),
                         
-                    });
+                        }).single();
 
                 if (userError) {
                     console.error("Error inserting user:", userError);
                 } else {
                     console.log("User created successfully:", userData);
+
                     return new Response(
                         JSON.stringify({
                             message: "OTP verified successfully  User account is created",
-                            data: data,
+                                id:verifiedUser.id,bearerToken:userSession?.access_token
                         }),
                         {
                             status: 200,
@@ -113,11 +101,15 @@ export default async function verifyOtp(req: Request) {
             }
         }
 
+        }       
+        
+
         // Return success response with OTP data (which will be sent via SMS)
+        const {user:verifiedUser,session:userSession} = data;
         return new Response(
             JSON.stringify({
                 message: "OTP verified successfully",
-                data: data,
+                id:verifiedUser?.id,bearerToken:userSession?.access_token,
             }),
             {
                 status: 200,

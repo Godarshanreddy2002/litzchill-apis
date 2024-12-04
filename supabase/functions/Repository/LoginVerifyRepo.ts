@@ -1,4 +1,4 @@
-import supabase from "../DbConfig/DbConn.ts";
+import {supabase} from "../DbConfig/DbConn.ts";
 
 export async function getAuthUser(id:string) 
 {

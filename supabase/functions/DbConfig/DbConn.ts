@@ -1,8 +1,7 @@
-import {createClient} from "npm:@supabase/supabase-js"
-
-const url=Deno.env.get('SUPABSE_URL')||'';
-const key=Deno.env.get('SUPABASE_ANON_KEY')||'';
-
-const supabase=createClient(url,key);
-
-export default supabase;
+import 'https://deno.land/x/dotenv@v3.0.0/load.ts';
+import { createClient } from 'npm:@supabase/supabase-js';
+ 
+export const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+);

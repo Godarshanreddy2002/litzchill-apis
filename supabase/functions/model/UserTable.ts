@@ -1,6 +1,6 @@
 
 export interface UserProfile {
-    auth_user_id?: string;
+    user_id?: string;
     first_name: string | null;
     last_name: string | null;
     username: string;

@@ -1,41 +1,82 @@
-import {createClient} from "npm:@supabase/supabase-js"
-const url='https://rpsfsggtydflqjkduzgt.supabase.co'
-const key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwc2ZzZ2d0eWRmbHFqa2R1emd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIxNzE2ODYsImV4cCI6MjA0Nzc0NzY4Nn0.wdRGjSJBef_UexqTmpok3-cRxHO6I86jbDMYmvbzZC0'
-
-const supabase=createClient(url,key);
+import { supabase } from "../DbConfig/DbConn.ts";
+import { handleAllErrors } from "../ErrorHandler/HandlingError.ts";
 import { UserProfile } from "../model/UserTable.ts";
 
 export default async function updateUserProfile(req: Request) {
     try {
-        if (req.method !== "PUT") {
+        if (req.method !== "PATCH") {
             return new Response("Method Not Allowed", { status: 405 });
         }
+        console.log("started update");
 
-        const user = req.headers.get("Authorization");
-        if (!user) {
-            return new Response("Unauthorized", { status: 401 });
+        // const user = req.headers.get("Authorization");
+        // if (!user) {
+        //     console.log("First check")
+        //     return new Response("Unauthorized", { status: 401 });
+        // }
+
+        // const jwt = user.replace("Bearer ", "");
+        // const { data: userData, error: authError } = await supabase.auth
+        //     .getUser(jwt);
+        // if (authError || !userData) {
+        //     console.log("user session expired")
+        //     return new Response("Unauthorized", { status: 401 });
+        // }
+        // console.log(userData);
+        // const user_id = userData.user.id;
+        // console.log(user_id);
+
+        const updateUser: UserProfile = await req.json();
+        const user_id = updateUser.user_id;
+
+        if (!user_id) {
+            return handleAllErrors({
+                status_code: 400,
+                error_message: "missing field",
+                error_time: new Date(),
+            });
+        } else {
+            console.log("checking user");
+            const { data,error } = await supabase.auth.getUser();
+
+            if (error) {
+                console.log("database error at checking auth.users");
+                return new Response(`Error fetching user data: ${error.message}`, { status: 500 });
+            } else if (data) {
+                console.log("access token");
+                console.log(data.user);
+            } else {
+                console.log("session expired");
+                return new Response(
+                    JSON.stringify({ error: "User session is expired" }),
+                    {
+                        status: 440,
+                        headers: { "Content-Type": "application/json" },
+                    },
+                );
+            }
         }
 
-        const jwt = user.replace("Bearer ", "");
-        const { data: userData, error: authError } = await supabase.auth
-            .getUser(jwt);
-        if (authError || !userData) {
-            return new Response("Unauthorized", { status: 401 });
+        // if(!updateUser.first_name||!updateUser.last_name||!updateUser.dob||!updateUser.username||updateUser.gender)
+        // {
+        //     throw new Error("Missing Required field")
+        // }
+        if (!updateUser.first_name) {
+            throw new Error("Missing Required first name");
+        } else if (!updateUser.last_name) {
+            throw new Error("Missing Required last name");
+        } else if (!updateUser.username) {
+            throw new Error("Missing Required user name");
+        } else if (!updateUser.gender) {
+            throw new Error("Missing Required Gender");
+        } else if (!updateUser.dob) {
+            throw new Error("missing Date of birth");
         }
 
-        const user_id = userData.user.id;
-        console.log(user_id);
-
-        const requestBody = await req.json();
-        const updateUser: UserProfile = requestBody;
-        if(!updateUser.first_name||!updateUser.last_name||!updateUser.dob||!updateUser.username||updateUser.gender)
-        {
-            throw new Error("Missing Required field")
-        }
         const { data, error } = await supabase
             .from("users")
             .select("*")
-            .eq("auth_user_id", user_id).single();
+            .eq("user_id", user_id).single();
         if (error) {
             console.log("error in database");
         }
@@ -45,17 +86,17 @@ export default async function updateUserProfile(req: Request) {
                 return new Response(
                     JSON.stringify("User Account is deactivated/Suspended"),
                     {
-                        status: 200,
+                        status: 403,
                         headers: { "Content-Type": "application/json" },
                     },
                 );
             }
         }
-
+        updateUser.updated_at = new Date().toISOString();
         const { data: userUData, error: userUError } = await supabase
             .from("users")
-            .update({ updateUser, updated_at: new Date().toISOString() })
-            .eq("auth_user_id", user_id)
+            .update(updateUser)
+            .eq("user_id", user_id)
             .eq("account_status", "A");
 
         if (userUError) {
@@ -66,7 +107,7 @@ export default async function updateUserProfile(req: Request) {
         }
 
         return new Response(
-            JSON.stringify("User data is successfully updated"),
+            JSON.stringify({ message: "User data is successfully updated" }),
             {
                 status: 200,
                 headers: { "Content-Type": "application/json" },
