@@ -2,17 +2,53 @@
 import signInWithOtp from "../Handler/SendOtp.ts";
 import verifyOtp from "../Handler/VerifyOtp.ts";
 import updateUserProfile from "../Handler/ProfileUpdate.ts";
-import logoutUser from "../Handler/LogOut.ts";
+
+import { ErrorResponse } from "../utils/Response.ts";
 
 
 
 
 Deno.serve(async (req: Request) => {
-  // Get the method (GET, POST, etc.) and path of the request
+  
   const  url  = new URL(req.url)
   const path=url.pathname.split('/');
   const endUrl=path[path.length-1];
-  // Check the type of request based on the URL or method
+  
+  if(req.method=='POST')
+  {
+    if (endUrl === 'sendOtp') {
+      const data= signInWithOtp(req);
+      console.log("sign in")
+     
+  
+      return data;
+  
+    } else if(endUrl=='verifyOtp')
+    {
+      const data=await verifyOtp(req);
+      return data;
+    }
+  }
+ else if(req.method=='PUT')
+  {
+    if (endUrl === 'userUpdate' ) {
+      const data=await updateUserProfile(req)
+      return data;
+  
+    }
+  }
+ 
+  return ErrorResponse("Route not found",505);
+
+});
+
+
+
+
+
+
+
+  /*
   if (endUrl === 'sendOtp') {
     const data= signInWithOtp(req);
     console.log("sign in")
@@ -20,14 +56,13 @@ Deno.serve(async (req: Request) => {
 
     return data;
 
-  } else if (endUrl === 'verifyOtp' ) {
-    console.log("verify")
-    // Logic for verifying OTP
+  } else if(endUrl=='verifyOtp')
+  {
     const data=await verifyOtp(req);
-    return data;   
-//user/:id {a:dd,}   
-
-  } else if (endUrl === 'userUpdate' ) {
+    return data;
+  }
+  
+  else if (endUrl === 'userUpdate' ) {
     const data=await updateUserProfile(req)
     return data;
 
@@ -37,8 +72,17 @@ Deno.serve(async (req: Request) => {
     const data=await logoutUser(req);
     return data;
   }
+  else if(endUrl=='de_activate')
+  {
+    const data=await DeactivateAccount(req)
+    return data
+  }
    else {
     // Default response for unsupported routes or methods
     return new Response(JSON.stringify({ error: 'Route not found or method not allowed' }), { status: 404 });
   }
+
+  
+  
 });
+*/
