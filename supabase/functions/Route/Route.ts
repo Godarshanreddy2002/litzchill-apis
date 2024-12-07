@@ -1,28 +1,40 @@
+import { DeactivateAccount } from "../Handler/DeactivateAccount.ts";
+import FetchUserProfile from "../Handler/FetchUser.ts";
 import logoutUser from "../Handler/LogOut.ts";
+
 import updateUserProfile from "../Handler/ProfileUpdate.ts";
 import signInWithOtp from "../Handler/SendOtp.ts";
 import verifyOtp from "../Handler/VerifyOtp.ts";
+import { HTTPMETHOD } from "../utils/constant.ts";
 
-type RouteHandler = (req: Request) => Promise<Response>;
-type Router = Record<string, Record<string, RouteHandler>>;
- 
+import { userModuleRoute } from "./RoutePathAndHandler.ts";
+
+
 //mapping all the routes in one place
-export const AllRouters:Router={
-    "/userModule/sendOtp":{
-        POST:signInWithOtp
+export const UserModuleRoutes={
+   
+    [HTTPMETHOD.POST]:{
+        [userModuleRoute.SendOtpPath]:signInWithOtp,
+        [userModuleRoute.VerifyOtp]:verifyOtp,
+        [userModuleRoute.UserLogOut]:logoutUser
+        
+        
     },
-    "/userModule/userUpdate/:id":{
-       PATCH:updateUserProfile
+    [HTTPMETHOD.PATCH]:
+    {
+        [userModuleRoute.UpdateUser]:updateUserProfile,
+        [userModuleRoute.DeactivateUser]:DeactivateAccount,
     },
-    "/userModule/verifyOtp":{
-        POST:verifyOtp
+    [HTTPMETHOD.GET]:
+    {
+        [userModuleRoute.FetchUser]:FetchUserProfile,
     },
-   "/userModule/logout":{
-        POST:logoutUser
-    },
+        
    
  
 }
+
+
 
   
  

@@ -1,7 +1,8 @@
 import { supabase } from "../DbConfig/DbConn.ts";
 
 import { UserProfile } from "../model/UserTable.ts";
-import { ErrorResponse, SuccessResponse } from "../utils/Response.ts";
+import { STATUSCODE, USERMODULE } from "../utils/constant.ts";
+import { ErrorResponse} from "../utils/Response.ts";
 
 /**
  * this method is used to get user profile  based on the user_Id
@@ -37,7 +38,7 @@ export async function verify_user(phno: string) {
     .eq("mobile", phno)
     .single();
   if (error) {
-    return ErrorResponse(`${error}`, 500);
+    return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
   } else {
     return data;
   }
@@ -61,7 +62,7 @@ export async function getUser(phoneNo: string) {
     .single();
 
   if (error) {
-    return ErrorResponse(`${error}`, 500);
+    return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
   } else {
     return data;
   }
@@ -87,7 +88,7 @@ export async function updateProfile(profile: UserProfile, user_id: string) {
   if (error) {
     return ErrorResponse(`${error}`, 500);
   } else if (data == null) {
-    return ErrorResponse("your account is usspendeded/Deactivated", 500);
+    return ErrorResponse(USERMODULE.ACCOUNT_DEACTIVATED,STATUSCODE.FORBIDDEN);
   } else {
     return data;
   }

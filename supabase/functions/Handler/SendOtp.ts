@@ -2,6 +2,7 @@
 import { supabase } from "../DbConfig/DbConn.ts";
 import { getUser } from "../Repository/UserRepo.ts";
 import { verify_user } from "../Repository/UserRepo.ts";
+import { STATUSCODE, USERMODULE } from "../utils/constant.ts";
 import { ErrorResponse, SuccessResponse } from "../utils/Response.ts";
 import { isPhoneNumberAvailable } from "../utils/ValidateFields.ts";
 // 
@@ -9,7 +10,7 @@ export default async function signInWithOtp(req: Request) {
   
   const method = req.method;
   
-  if (method === "POST") {
+ 
     console.log("Start of signin");
 
     const { phoneNo } = await req.json();
@@ -25,27 +26,24 @@ export default async function signInWithOtp(req: Request) {
       });
 
       if (error) {
-        return ErrorResponse(`${error}`,500)
+        return ErrorResponse(`${error}`,STATUSCODE.INTERNAL_SERVER_ERROR)
       }
-      return SuccessResponse("Otp Successfully sent");
+      return SuccessResponse(USERMODULE.SENT_OTP_SUCCESS);
       
     } 
-    const user=await getUser(phoneNo)    
-    if (user && user.failed_login_count<3) {      
+    const user=await getUser(phoneNo)   
+
+    if (user) {      
       const {  error } = await supabase.auth.signInWithOtp({
         phone: phoneNo,
       });
       if (error) {
-        return ErrorResponse(`${error}`,500);
+        return ErrorResponse(`${error}`,STATUSCODE.INTERNAL_SERVER_ERROR);
       }
       else{
-        return SuccessResponse(`OTP successfully sent to ${phoneNo}`)
+        return SuccessResponse(USERMODULE.SENT_OTP_SUCCESS)
       }
     }
-  }
-  else{
-   return ErrorResponse("Method not supported",405)
-  }
-  return ErrorResponse("something went wrong",500) 
+  
 }
 

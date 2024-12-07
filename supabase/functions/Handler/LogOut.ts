@@ -4,8 +4,6 @@ import { handleAllErrors } from "../ErrorHandler/HandlingError.ts";
 export default async function logoutUser(req:Request) 
 {
    
-        if(req.method=="POST")
-        {
             const { error } = await supabase.auth.signOut()
             if(error)
             {
@@ -21,10 +19,6 @@ export default async function logoutUser(req:Request)
                     }                       
                 )
             }
-            
-        }
-    else{
-        return handleAllErrors({status_code:405,error_message:"method not allowed here",error_time:new Date()})
-    }
+       
 
 }

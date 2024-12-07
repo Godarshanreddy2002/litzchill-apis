@@ -1,12 +1,11 @@
 import { handleAllErrors } from "../ErrorHandler/HandlingError.ts";
 import { supabase } from "../DbConfig/DbConn.ts";
 
-export async function FetchUser(req: Request) {
-  if (req.method === 'GET') {
+export default async function FetchUserProfile(req: Request,userId:string) {
+  
     try {
       
-      const url = new URL(req.url);
-      const userId = url.searchParams.get('userId'); // Assuming the userId is passed as a query parameter
+    
 
       if (!userId) {
         return handleAllErrors({
@@ -50,11 +49,6 @@ export async function FetchUser(req: Request) {
         error_time: new Date(),
       });
     }
-  } else {
-    return handleAllErrors({
-      status_code: 405,
-      error_message: "Method Not Allowed",
-      error_time: new Date(),
-    });
-  }
+ 
+ 
 }

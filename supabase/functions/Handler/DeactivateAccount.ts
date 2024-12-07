@@ -1,10 +1,9 @@
 import { supabase } from "../DbConfig/DbConn.ts";
 
 
-export async function DeactivateAccount(req:Request) 
+export async function DeactivateAccount(req:Request,user_id:string) 
 {
-    if(req.method=="POST")        
-    {
+  
         const user = req.headers.get("Authorization");
         if (!user) {
             console.log("First check")
@@ -19,7 +18,6 @@ export async function DeactivateAccount(req:Request)
             return new Response("Unauthorized", { status: 401 });
         }
 
-        const { user_id } = await req.json();
         const account_status:string='S';
         const {data,error}=await supabase
         .from('users')
@@ -44,13 +42,6 @@ export async function DeactivateAccount(req:Request)
                 }
             )
         }
-    }
-    else{
-        return new Response("Internal server Error",
-            {
-                status:200,headers:{"Content-Type": "application/json"}
-            }
-        )
-    }
+    
 }
     

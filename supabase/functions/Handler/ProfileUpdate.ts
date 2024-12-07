@@ -1,13 +1,12 @@
 import { supabase } from "../DbConfig/DbConn.ts";
 import { UserProfile } from "../model/UserTable.ts";
 
-export default async function updateUserProfile(req: Request) {
+export default async function updateUserProfile(req: Request,user_id:string) {
     try {
-    if (req.method !== "PATCH") {
-        return new Response("Method Not Allowed", { status: 405 });
-    }
+        
 
         const user = req.headers.get("Authorization");
+        console.log(user);
         if (!user) {
             console.log("First check")
             return new Response("Unauthorized", { status: 401 });
@@ -20,9 +19,7 @@ export default async function updateUserProfile(req: Request) {
             console.log("user session expired")
             return new Response("Unauthorized", { status: 401 });
         }
-        console.log(userData);
-        const user_id = userData.user.id;
-        console.log(user_id);
+       
         
 
         const requestBody = await req.json();
@@ -47,7 +44,7 @@ export default async function updateUserProfile(req: Request) {
         const { data, error } = await supabase
             .from("users")
             .select("*")
-            .eq("user_id", updateUser.user_id).single();
+            .eq("user_id", user_id).single();
         if (error) {
             console.log("error in database");
         }
@@ -69,7 +66,7 @@ export default async function updateUserProfile(req: Request) {
         const { data: userUData, error: userUError } = await supabase
             .from("users")
             .update( updateUser )
-            .eq("user_id",updateUser.user_id)
+            .eq("user_id",user_id)
             .eq("account_status", "A");
 
         if (userUError) {
