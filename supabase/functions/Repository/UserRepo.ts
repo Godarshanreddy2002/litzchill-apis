@@ -2,7 +2,7 @@ import { supabase } from "../DbConfig/DbConn.ts";
 
 import { UserProfile } from "../model/UserTable.ts";
 import { STATUSCODE, USERMODULE } from "../utils/constant.ts";
-import { ErrorResponse} from "../utils/Response.ts";
+import { ErrorResponse, SuccessResponse} from "../utils/Response.ts";
 
 /**
  * this method is used to get user profile  based on the user_Id
@@ -11,17 +11,14 @@ import { ErrorResponse} from "../utils/Response.ts";
  * @returns
  */
 export async function getUserProfile(id: string) {
-  const { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("user_id", id)
-    .single(); // Ensure that only one user is returned
+  console.log("fetching start");
+  const {data:userData,error:userError}=await supabase
+       .from('users')
+       .select('*')
+       .eq('user_id',id);
 
-  if (error) {
-    return ErrorResponse(`${error}`, 500);
-  } else {
-    return data;
-  }
+       return {userData,userError};
+  
 }
 
 /**
@@ -86,9 +83,9 @@ export async function updateProfile(profile: UserProfile, user_id: string) {
     .single();
 
   if (error) {
-    return ErrorResponse(`${error}`, 500);
+    return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
   } else if (data == null) {
-    return ErrorResponse(USERMODULE.ACCOUNT_DEACTIVATED,STATUSCODE.FORBIDDEN);
+    return ErrorResponse(USERMODULE.USER_NOT_FOUND,STATUSCODE.FORBIDDEN);
   } else {
     return data;
   }
@@ -96,7 +93,7 @@ export async function updateProfile(profile: UserProfile, user_id: string) {
 /**
  * This method is used to update user account status
  *
- * @param user_Id
+ * @param user_Id --
  * @param lockout_time
  * @param faild_login_count
  * @returns
@@ -117,12 +114,18 @@ export async function makeUserLockout(
     })
     .eq("user_id", user_Id).select("*").single();
   if (error) {
-    return ErrorResponse(`${error}`, 500);
+    return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
   } else {
     return data;
   }
 }
-
+/**
+ * This method is used to create new user account
+ * 
+ * @param user_id --user user id
+ * @param phoneNo --user phone number
+ * @returns 
+ */
 export async function RegisterUser(user_id: string, phoneNo: string) {
   const { data, error } = await supabase
     .from("users")
@@ -133,6 +136,28 @@ export async function RegisterUser(user_id: string, phoneNo: string) {
     }).single();
     if(error)
     {
-      return ErrorResponse(`${error}`,500)
+      return ErrorResponse(`${error}`,STATUSCODE.INTERNAL_SERVER_ERROR)
     }    
+}
+
+
+export async function DeactivateUser(user_Id:string) 
+{
+  const {data,error}=await supabase
+    .from('users')
+    .update({'account_status':'S'})
+    .eq('user_id',user_Id)
+    .select('*')
+    .single();
+    if(error)
+    {
+      return ErrorResponse(`${error}`,STATUSCODE.INTERNAL_SERVER_ERROR)
+    }
+    if(!data)
+    {
+      return ErrorResponse(USERMODULE.USER_NOT_FOUND,STATUSCODE.NOT_FOUND)
+    }
+    return SuccessResponse(USERMODULE.ACCOUNT_DEACTIVATED)
+    
+  
 }

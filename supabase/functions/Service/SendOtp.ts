@@ -8,14 +8,20 @@ import { isPhoneNumberAvailable } from "../utils/ValidateFields.ts";
 // 
 export default async function signInWithOtp(req: Request) {
   
-  const method = req.method;
+ 
   
  
     console.log("Start of signin");
 
     const { phoneNo } = await req.json();
     // This method checks the phone number is available or not
-   isPhoneNumberAvailable(phoneNo);
+   const phoneNoIsnotThere=isPhoneNumberAvailable(phoneNo);
+
+   if(phoneNoIsnotThere instanceof Response)
+   {
+    return phoneNoIsnotThere;
+   }
+
     
     const verifyUser = await verify_user(phoneNo);//getting user with phone number
    

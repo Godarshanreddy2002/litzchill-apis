@@ -11,10 +11,11 @@ export function ErrorResponse(message:string,status_code:number):Response
         },
     );        
 }
-export function SuccessResponse(message:string):Response 
+export function SuccessResponse(message:string,data?:any):Response 
 {
+    const body=data?{message,data}:{message}
     return new Response(
-        JSON.stringify({ message: message }),
+        JSON.stringify(body),
         {
             status: 200,
             headers: { "Content-Type": "application/json" },

@@ -10,8 +10,17 @@ export default async function verifyOtp(req: Request) {
         console.log("Verify OTP API started");
         const { Otp, phoneNo } = await req.json();
 
-        isPhoneNumberAvailable(phoneNo);
-        isOtpAvailable(Otp);
+        const validPhone=isPhoneNumberAvailable(phoneNo);
+        
+        if(validPhone instanceof Response)
+        {
+            return validPhone;
+        }
+        const validOtp=isOtpAvailable(Otp);
+        if(validOtp instanceof Response)
+            {
+                return validPhone;
+            }
         const verifyUser = await verify_user(phoneNo);
         if (verifyUser == null) {
             const { data, error } = await supabase.auth.verifyOtp({
@@ -49,11 +58,11 @@ export default async function verifyOtp(req: Request) {
                 const data = makeUserLockout(user.user_Id, user.lockout_time,fC + 1,user.account_status);
             }
 
-            return ErrorResponse("Invalid OTP", 401);
+            return ErrorResponse(USERMODULE.INVALID_OTP, STATUSCODE.CONFLICT);
         } else {
             const userId = data.user?.id || "";
             const access_token = data.session?.access_token || "";
-            return returnAccessToken("OTP is successfully verified", userId, access_token);
+            return returnAccessToken(USERMODULE.VERIFY_OTP_SUCCESS, userId, access_token);
         }
     
 }

@@ -1,10 +1,11 @@
-import { DeactivateAccount } from "../Handler/DeactivateAccount.ts";
-import FetchUserProfile from "../Handler/FetchUser.ts";
-import logoutUser from "../Handler/LogOut.ts";
 
-import updateUserProfile from "../Handler/ProfileUpdate.ts";
-import signInWithOtp from "../Handler/SendOtp.ts";
-import verifyOtp from "../Handler/VerifyOtp.ts";
+
+import { DeactivateAccount } from "../Service/DeactivateAccount.ts";
+import FetchUserProfile from "../Service/FetchUser.ts";
+import logoutUser from "../Service/LogOut.ts";
+import updateUserProfile from "../Service/ProfileUpdate.ts";
+import signInWithOtp from "../Service/SendOtp.ts";
+import verifyOtp from "../Service/VerifyOtp.ts";
 import { HTTPMETHOD } from "../utils/constant.ts";
 
 import { userModuleRoute } from "./RoutePathAndHandler.ts";
@@ -27,7 +28,7 @@ export const UserModuleRoutes={
     },
     [HTTPMETHOD.GET]:
     {
-        [userModuleRoute.FetchUser]:FetchUserProfile,
+    [userModuleRoute.FetchUser]:FetchUserProfile,
     },
         
    
