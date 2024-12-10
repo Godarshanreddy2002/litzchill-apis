@@ -31,14 +31,14 @@ export async function getUserProfile(id: string) {
 export async function verify_user(phno: string) {
   const { data, error } = await supabase
     .from("users")
-    .select("mobile")
+    .select("*")
     .eq("mobile", phno)
     .single();
   if (error) {
     return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
-  } else {
-    return data;
-  }
+  } 
+  
+  return data;
 }
 
 /**
@@ -53,16 +53,13 @@ export async function getUser(phoneNo: string) {
     .from("users") // Specify the 'users' table and its type
     .select("*")
     .eq("mobile", phoneNo)
-    .eq("account_status", "A")
-    .lt('faild_login_count',3)
     .or(`lockout_time.lt.${new Date().toISOString()},lockout_time.is.null`)
     .single();
 
   if (error) {
     return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
-  } else {
-    return data;
-  }
+  } 
+  return data;
 }
 
 /**
@@ -102,22 +99,25 @@ export async function updateProfile(profile: UserProfile, user_id: string) {
 export async function makeUserLockout(
   user_Id: string,
   lockout_time: string|null,
-  faild_login_count: number,
+  failed_login_count: number,
   account_status: string,
 ) {
-  const { data, error } = await supabase
-    .from("users")
-    .update({
-      "lockout_time": lockout_time,
-      "faild_login_count": faild_login_count,
-      "account_status": account_status,
-    })
-    .eq("user_id", user_Id).select("*").single();
+  console.log("Failed Login count",failed_login_count);
+  console.log("User id is :",user_Id);
+    const{data:userData,error}=await supabase
+            .from('users')
+            .update({
+              'account_status':account_status,
+              'lockout_time':lockout_time,
+              'failed_login_count':failed_login_count
+            })
+            .eq('user_id',user_Id).select();
   if (error) {
     return ErrorResponse(`${error}`, STATUSCODE.INTERNAL_SERVER_ERROR);
-  } else {
-    return data;
-  }
+  } 
+  console.log("lockout count data",userData)
+    return userData;
+  
 }
 /**
  * This method is used to create new user account
@@ -134,10 +134,7 @@ export async function RegisterUser(user_id: string, phoneNo: string) {
       "mobile": phoneNo,
       "account_verified": { email: false, phone: true },
     }).single();
-    if(error)
-    {
-      return ErrorResponse(`${error}`,STATUSCODE.INTERNAL_SERVER_ERROR)
-    }    
+   return {data,error}
 }
 
 

@@ -15,6 +15,7 @@ export function isOtpAvailable(otp:string)
 {
     if(!otp)    
     {
+        
         return ErrorResponse(USERMODULE.OTP,STATUSCODE.BAD_REQUEST)
     }
 }

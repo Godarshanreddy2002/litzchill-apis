@@ -6,9 +6,12 @@ import { SuccessResponse } from "../utils/Response.ts";
 import { USERMODULE } from "../utils/constant.ts";
 export default async function updateUserProfile(req: Request,user_id:string) {
     try {
-        const roles:string[]=['A','S']
+        const roles:string[]=['A','U']
         
-        const userParams=await getUserAuthenticationDetails(req,roles);        
+        const result=await getUserAuthenticationDetails(req,roles);   
+    if(result.response &&!result.params){
+        return result.response;
+ } 
         const requestBody = await req.json();
         const updateUser: UserProfile = requestBody;   
         

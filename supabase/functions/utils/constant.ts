@@ -18,7 +18,7 @@ export const USERMODULE={
     USER_ID:"User Id required",
     SENT_OTP_SUCCESS:"OTP sent successfully",
     VERIFY_OTP_SUCCESS:"OTP verified success fully",
-    ACCOUNT_DEACTIVATED:"your account is sspendeded/Deactivated due to multiple faild logins ",
+    ACCOUNT_DEACTIVATED:"your account is suspendeded/Deactivated",
     METHOD_NOT_SUPPORTED:"Method not supported",
     INTERNAL_SERVER_ERROR:"something went wrong",
     USER_VERIFIED:"OTP is verified successfully",
@@ -29,7 +29,9 @@ export const USERMODULE={
     USER_LOGOUT_SUCCESS:"User logout success",
     USER_DETAILS:"User details: ",
     DEACTIVATE_USER:"User is deactivated successfully",
-    ACTIVATE_USER:"User is activated successfully"
+    ACTIVATE_USER:"User is activated successfully",
+    LOCK_USER:"Your account is locked due to multiple faild atempts",
+    UNAUTHERIZED_USER:"Authentication failed: User session expired or invalid JWT."
  
 }
 export const HTTPMETHOD={
